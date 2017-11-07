@@ -1,0 +1,303 @@
+DROP SCHEMA IF EXISTS `orm-pos`;
+
+
+
+CREATE SCHEMA `orm-pos` CHARACTER SET utf8 COLLATE utf8_polish_ci;
+
+
+
+use `orm-pos`;
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+
+DROP TABLE IF EXISTS `Employees`;
+
+DROP TABLE IF EXISTS `Customer_details`;
+
+DROP TABLE IF EXISTS `Customers`;
+
+DROP TABLE IF EXISTS `Categories`;
+
+DROP TABLE IF EXISTS `Products`;
+
+DROP TABLE IF EXISTS `Payments`;
+
+DROP TABLE IF EXISTS `Status`;
+
+DROP TABLE IF EXISTS `Orders`;
+
+DROP TABLE IF EXISTS `Orderitems`;
+
+DROP TABLE IF EXISTS `Storehouses`;
+
+CREATE TABLE `Employees`
+(`id`		INT(6) NOT NULL AUTO_INCREMENT,
+ `f_name`	VARCHAR(30) NOT NULL,
+ `l_name`	VARCHAR(30) NOT NULL,
+ `email`	VARCHAR(40) DEFAULT NULL,
+ PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `Customer_details` 
+(
+`id` int(11) NOT NULL AUTO_INCREMENT,
+  
+ `email`    	VARCHAR(40) DEFAULT NULL,
+ `phone`      	VARCHAR(13) DEFAULT NULL,
+ `street`      	VARCHAR(30) DEFAULT NULL,
+ `zip`       	VARCHAR(6) DEFAULT NULL,
+ `city`   	VARCHAR(30) DEFAULT NULL,
+ PRIMARY KEY (`id`)
+
+);
+
+CREATE TABLE `Customers`
+(`id`  		INT(6) NOT NULL AUTO_INCREMENT,
+ `first_name`	VARCHAR(30) NOT NULL,
+ `last_name`  	VARCHAR(30) NOT NULL,
+ `details`	INT(6) DEFAULT NULL,
+ PRIMARY KEY (`id`),
+ KEY `FK_detail_idx` (`details`),
+  
+ CONSTRAINT `FK_detail` FOREIGN KEY (`details`) REFERENCES `Customer_details` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE `Categories`
+(`id`   	INT(6) NOT NULL AUTO_INCREMENT,
+ `name`    	VARCHAR(40) NOT NULL,
+ `description` 	VARCHAR(200) DEFAULT NULL,
+ PRIMARY KEY (`id`)
+
+);
+
+CREATE TABLE `Products`
+(`id` 		INT(6) NOT NULL AUTO_INCREMENT,
+ `name`    	VARCHAR(50) NOT NULL,
+ `category`    	INT(6) NOT NULL,
+ `price`	DECIMAL(10,2) NOT NULL,
+ PRIMARY KEY (`id`),
+ KEY `FK_category_idx` (`category`),
+  
+  
+ CONSTRAINT `FK_category` FOREIGN KEY (`category`) 
+REFERENCES `Categories` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE `Payments`
+(`id`    	INT(6) NOT NULL AUTO_INCREMENT,
+ `name`  	VARCHAR(30) NOT NULL,
+ PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `Status`
+(`id`   	INT(6) NOT NULL AUTO_INCREMENT,
+ `name`    	VARCHAR(30) NOT NULL,
+ `description`  VARCHAR(100) DEFAULT NULL,
+ PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `Orders`
+(`id`       	INT(6) NOT NULL AUTO_INCREMENT,
+ `customer`   	INT(6) NOT NULL,
+ `date` 	DATE NOT NULL,
+ `status`	INT(6) NOT NULL,
+ `payment`	INT(6) NOT NULL,
+ PRIMARY KEY (`id`),
+ KEY `FK_customer_idx` (`customer`),
+  
+  
+ CONSTRAINT `FK_customer` FOREIGN KEY (`customer`) 
+REFERENCES `Customers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+ KEY `FK_status_idx` (`status`),
+  
+  
+ CONSTRAINT `FK_status` FOREIGN KEY (`status`) 
+REFERENCES `Status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+ KEY `FK_payment_idx` (`payment`),
+  
+  
+ CONSTRAINT `FK_payment` FOREIGN KEY (`payment`) 
+REFERENCES `Payments` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE `Orderitems`
+(`order_id`      INT(6) NOT NULL,
+ `product_id` 	INT(6) NOT NULL,
+ `quantity` 	INT(5) NOT NULL,
+ PRIMARY KEY (`order_id`,`product_id`),
+ KEY `FK_order_idx` (`order_id`),
+  
+  
+ CONSTRAINT `FK_order` FOREIGN KEY (`order_id`) 
+REFERENCES `Orders` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+ KEY `FK_product_idx` (`product_id`),
+  
+  
+ CONSTRAINT `FK_product` FOREIGN KEY (`product_id`) 
+REFERENCES `Products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE `Storehouses`
+(`id`		INT(6) NOT NULL AUTO_INCREMENT,
+ `name`		VARCHAR(30) DEFAULT NULL,
+ `phone`      	VARCHAR(13) DEFAULT NULL,
+ `street`      	VARCHAR(30) NOT NULL,
+ `zip`       	VARCHAR(6) DEFAULT NULL,
+ `city`   	VARCHAR(30) NOT NULL,
+ PRIMARY KEY (`id`)
+
+);
+
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+INSERT INTO `Employees`
+VALUES (null, 'Antoni', 'Kowalski', 'antkow@pos.com');
+INSERT INTO `Employees`
+VALUES (null, 'Anna', 'Mostowiak', 'annmos@pos.com');
+INSERT INTO `Employees`
+VALUES (null, 'Tomasz', 'Hajto', 'tomhaj@pos.com');
+
+
+INSERT INTO `Customer_details`
+VALUES(1, 'zenlew@gmail.com', '754234824', 'Wiejska 1/3', '23-300', 'Ruda');
+INSERT INTO `Customer_details`
+VALUES(2, 'paukop@gmail.com', '723537184', 'Polna 6/2', '14-200', 'Ryn');
+INSERT INTO `Customer_details`
+VALUES(3, 'alewie@gmail.com', '874356924', 'Warszawska 121a/3', '12-500', 'Olsztyn');
+INSERT INTO `Customer_details`
+VALUES(4, 'robbon@gmail.com', '634246743', 'Waszyngtona 24/23', '64-300', 'Zabrze');
+INSERT INTO `Customer_details`
+VALUES(5, 'gragrz@gmail.com', '533256743', 'Wiejska 15/32', '23-300', 'Ruda');
+INSERT INTO `Customer_details`
+VALUES(6, 'jankuc@gmail.com', '754234274', 'Bia³ostocka 12b/2', '11-300', 'Mi³ki');
+INSERT INTO `Customer_details`
+VALUES(7, 'klakub@gmail.com', '532154736', 'Bia³ostocka 12b/3', '11-300', 'Mi³ki');
+
+
+INSERT INTO `Customers`
+VALUES(null, 'X', 'X', null);
+INSERT INTO `Customers`
+VALUES(null, 'John', 'Doe', null);
+INSERT INTO `Customers`
+VALUES(null, 'Zenon', 'Lewandowski', 1);
+INSERT INTO `Customers`
+VALUES(null, 'Paulina', 'Kopacz', 2);
+INSERT INTO `Customers`
+VALUES(null, 'Aleksandra', 'Wielkopolska', 3);
+INSERT INTO `Customers`
+VALUES(null, 'Robert', 'Boniek', 4);
+INSERT INTO `Customers`
+VALUES(null, 'Gra¿yna', 'Grzyb', 5);
+INSERT INTO `Customers`
+VALUES(null, 'Janusz', 'Kucharczyk', 6);
+INSERT INTO `Customers`
+VALUES(null, 'Klaudia', 'Kubica', 7);
+INSERT INTO `Customers`
+VALUES(null, 'Kate', 'Jones', null);
+
+
+INSERT INTO `Categories`
+VALUES(null, 'TELEFONY', 'Telefony GSM, smarftony');
+INSERT INTO `Categories`
+VALUES(null, 'TELEWIZORY', 'Telewizory LCD, plazmowe, SmartTV');
+INSERT INTO `Categories`
+VALUES(null, 'FOTO I KAMERY', 'Aparaty cyfrowe, lustrzanki, kamery');
+INSERT INTO `Categories`
+VALUES(null, 'KOMPUTERY', 'Komputery PC, notebooki, ultrabooki');
+INSERT INTO `Categories`
+VALUES(null, 'TABLETY', 'Tablety');
+
+
+INSERT INTO `Products`
+VALUES(null, 'SAMSUNG Galaxy S8 64GB', 1, 3399.99);
+INSERT INTO `Products`
+VALUES(null, 'CANON PowerShot SX620 HS', 3, 899.99);
+INSERT INTO `Products`
+VALUES(null, 'SAMSUNG QLED QE55Q7C', 2, 7799.99);
+INSERT INTO `Products`
+VALUES(null, 'APPLE MacBook Air (MQD32ZE/A)', 4, 3799.99);
+INSERT INTO `Products`
+VALUES(null, 'SAMSUNG LED UE65MU6272', 2, 5499.99);
+INSERT INTO `Products`
+VALUES(null, 'PHILIPS LED 43PUS6262', 2, 1999.99);
+INSERT INTO `Products`
+VALUES(null, 'Laptop HP 250 G5 (1NV55ES)', 3, 1399.99);
+INSERT INTO `Products`
+VALUES(null, 'HUAWEI MediaPad T3 10.0', 5, 549.99);
+INSERT INTO `Products`
+VALUES(null, 'LENOVO Yoga 3 X50L LTE', 5, 1199.99);
+INSERT INTO `Products`
+VALUES(null, 'HUAWEI Mate 10 Lite', 1, 1499.99);
+
+
+INSERT INTO `Payments`
+VALUES(null, 'Gotówka');
+INSERT INTO `Payments`
+VALUES(null, 'PayPal');
+INSERT INTO `Payments`
+VALUES(null, 'Przelew bankowy');
+INSERT INTO `Payments`
+VALUES(null, 'Karta p³atnicza');
+
+
+INSERT INTO `Status`
+VALUES(null, 'Przyjête', null);
+INSERT INTO `Status`
+VALUES(null, 'Gotowe', 'Przygotowane do transportu');
+INSERT INTO `Status`
+VALUES(null, 'Zrealizowane', 'Op³acone i dostarczone');
+INSERT INTO `Status`
+VALUES(null, 'Anulowane', null);
+
+
+INSERT INTO `Orders`
+VALUES(null, 1, STR_TO_DATE('25-10-17','%d-%m-%y'), 1, 1);
+INSERT INTO `Orders`
+VALUES(null, 4, STR_TO_DATE('26-10-17','%d-%m-%y'), 3, 2);
+INSERT INTO `Orders`
+VALUES(null, 8, STR_TO_DATE('27-10-17','%d-%m-%y'), 3, 1);
+INSERT INTO `Orders`
+VALUES(null, 4, STR_TO_DATE('12-12-17','%d-%m-%y'), 4, 3);
+INSERT INTO `Orders`
+VALUES(null, 5, STR_TO_DATE('6-02-18','%d-%m-%y'), 2, 4);
+
+
+INSERT INTO `Orderitems`
+VALUES(1,2,3);
+INSERT INTO `Orderitems`
+VALUES(1,1,2);
+INSERT INTO `Orderitems`
+VALUES(1,3,6);
+INSERT INTO `Orderitems`
+VALUES(2,7,12);
+INSERT INTO `Orderitems`
+VALUES(2,4,3);
+INSERT INTO `Orderitems`
+VALUES(3,8,1);
+INSERT INTO `Orderitems`
+VALUES(4,2,1);
+INSERT INTO `Orderitems`
+VALUES(4,3,23);
+INSERT INTO `Orderitems`
+VALUES(5,1,1);
+INSERT INTO `Orderitems`
+VALUES(5,9,2);
+
+
+INSERT INTO `Storehouses`
+VALUES(null, 'ElektroHouse', '783243252', 'Warszawska 11', '12-500', 'Olsztyn');
+INSERT INTO `Storehouses`
+VALUES(null, 'PChurt', null, '3-go maja 81', '13-400', 'Wa³brzych');
+INSERT INTO `Storehouses`
+VALUES(null, null, '735241256', 'Wspólna 7', '16-100', 'Bia³ogard');
+INSERT INTO `Storehouses`
+VALUES(null, 'Electrox', '635224372', 'Leszczynowa 23', null, 'E³k');
+
+
+Commit;
