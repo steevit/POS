@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+		
+	<!-- AspectJ autoproxy support dla programowania aspektowego -->
+	<aop:aspectj-autoproxy />
+
+	<!-- support dla skanowania komponentów -->
+	<context:component-scan base-package="orm.pos" />
+
+	<!-- support dla konwersji, formatowania i walidacji (sterowanie adnotacjami) -->
+	<mvc:annotation-driven/>
+
+	<!-- Zdefiniowanie Spring MVC view resolver -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/view/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+    <!-- Krok 1: Zdefiniowanie Database DataSource / connection pool -->
+	<bean id="myDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
+        <property name="jdbcUrl" value="jdbc:mysql://host.com:3306/databasename?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+        <property name="user" value="username" />
+        <property name="password" value="password" /> 
+
+        <!-- właściwości puli połączeń dla C3P0 -->
+        <property name="minPoolSize" value="5" />
+        <property name="maxPoolSize" value="30" />
+        <property name="maxIdleTime" value="3000" />
+	</bean>  
+	
+    <!-- Krok 2: Ustawienie Hibernate session factory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="myDataSource" />
+		<property name="packagesToScan" value="orm.pos.entity" />
+		<property name="hibernateProperties">
+		   <props>
+		      <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+		      <prop key="hibernate.show_sql">true</prop>
+		   </props>
+		</property>
+   </bean>	  
+
+    <!-- Krok 3: Ustawienie Hibernate transaction manager -->
+	<bean id="myTransactionManager"
+            class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    <!-- Krok 4: Włączenie konfiguracji transakcji na podstawie adnotacji -->
+	<tx:annotation-driven transaction-manager="myTransactionManager" />
+	
+	<!-- Support dla czytania zasobów: css -->
+	<mvc:resources location="/resources/" mapping="/resources/**" />
+	
+	<!-- Załaduj własne wiadomości zasobów -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		
+		<property name="basenames" value="resources/messages" />
+		
+	</bean>
+
+</beans>
+
+
+
+
+
